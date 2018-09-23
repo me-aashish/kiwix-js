@@ -1213,9 +1213,8 @@ define(['jquery', 'zimArchiveLoader', 'uiUtil', 'settingsStore','abstractFilesys
         }
         resetCssCache();
         selectedArchive = zimArchiveLoader.loadArchiveFromFiles(files, function () {
-            // The archive is set : go back to home page to start searching
-            $("#btnHome").click();
             document.getElementById('downloadInstruction').style.display = 'none';
+            libzimWebWorker.postMessage({action: "init", files: selectedArchive._file._files});
         }, function (message, label) {
             // callbackError which is called in case of an error
             uiUtil.systemAlert(message, label);
@@ -1510,7 +1509,13 @@ define(['jquery', 'zimArchiveLoader', 'uiUtil', 'settingsStore','abstractFilesys
             }
         }
     }
-
+    
+    var messageChannel;
+    
+    var libzimWebWorker = new Worker("a.out.js");
+    
+    var libzimToBeUsed = true;
+    
     /**
      * Function that handles a message of the messageChannel.
      * It tries to read the content in the backend, and sends it back to the ServiceWorker
@@ -1541,13 +1546,29 @@ define(['jquery', 'zimArchiveLoader', 'uiUtil', 'settingsStore','abstractFilesys
                             messagePort.postMessage({ 'action': 'sendRedirect', 'title': title, 'redirectUrl': redirectURL });
                         });
                     } else {
-                        // Let's read the content in the ZIM file
-                        selectedArchive.readBinaryFile(dirEntry, function (fileDirEntry, content) {
-                            var mimetype = fileDirEntry.getMimetype();
-                            // Let's send the content to the ServiceWorker
-                            var message = { 'action': 'giveContent', 'title': title, 'content': content.buffer, 'mimetype': mimetype };
-                            messagePort.postMessage(message, [content.buffer]);
-                        });
+                        if (libzimToBeUsed) {
+                            console.log("Reading content from libzim for title " + title + "...");
+                            var tmpMessageChannel = new MessageChannel();
+                            var t0 = performance.now();
+                            tmpMessageChannel.port1.onmessage = function (event2) {
+                                var t1 = performance.now();
+                                var readTime = Math.round(t1 - t0);
+                                console.log("Content given by the webworker in " + readTime + " milliseconds");
+                                var message = {'action': 'giveContent', 'title' : title, 'content': event2.data};
+                                messagePort.postMessage(message);
+                            };
+                            libzimWebWorker.postMessage({action: "getContentByUrl", url: title}, [tmpMessageChannel.port2]);
+                        }
+                        else {
+                            console.log("Reading binary file from legacy backend...");
+                            // Let's read the content in the ZIM file
+                            selectedArchive.readBinaryFile(dirEntry, function (fileDirEntry, content) {
+                                var mimetype = fileDirEntry.getMimetype();
+                                // Let's send the content to the ServiceWorker
+                                var message = { 'action': 'giveContent', 'title': title, 'content': content.buffer, 'mimetype': mimetype };
+                                messagePort.postMessage(message, [content.buffer]);
+                            });
+                        }
                     }
                 };
                 selectedArchive.getDirEntryByPath(title).then(readFile).catch(function () {
