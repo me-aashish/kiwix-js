@@ -1187,6 +1187,14 @@ define(['jquery', 'zimArchiveLoader', 'uiUtil', 'settingsStore','abstractFilesys
                     // Configure home key press to focus #prefix only if the feature is in active state
                     if (params.useHomeKeyToFocusSearchBar)
                         iframeArticleContent.contentWindow.addEventListener('keydown', focusPrefixOnHomeKey);
+                    // Add event listener to iframe window to check for links to external resources
+                    iframeArticleContent.contentWindow.addEventListener('mousedown', function (e) {
+                        if (e.target.tagName === 'A' && /^http/i.test(e.target.getAttribute('href'))) {
+                            uiUtil.sysAlert('We prevented you from navigating away. You are trapped!');
+                            e.preventDefault();
+                            e.stopPropagation();
+                        }
+                    });
                     // Reset UI when the article is unloaded
                     iframeArticleContent.contentWindow.onunload = function () {
                         // remove eventListener to avoid memory leaks
