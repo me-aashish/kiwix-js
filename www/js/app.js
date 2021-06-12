@@ -1189,10 +1189,15 @@ define(['jquery', 'zimArchiveLoader', 'uiUtil', 'settingsStore','abstractFilesys
                         iframeArticleContent.contentWindow.addEventListener('keydown', focusPrefixOnHomeKey);
                     // Add event listener to iframe window to check for links to external resources
                     iframeArticleContent.contentWindow.addEventListener('mousedown', function (e) {
-                        if (e.target.tagName === 'A' && /^http/i.test(e.target.getAttribute('href'))) {
-                            uiUtil.sysAlert('We prevented you from navigating away. You are trapped!');
-                            e.preventDefault();
-                            e.stopPropagation();
+                        if (e.target.tagName === 'A') {
+                            var href = e.target.getAttribute('href');
+                            if (/^http/i.test(href)) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                uiUtil.systemAlert('Do you want to open this external link<br />:' + href, function(response) {
+                                    if (response) window.open(href,  '_blank');
+                                });
+                            }
                         }
                     });
                     // Reset UI when the article is unloaded

@@ -139,6 +139,37 @@ define(rqDef, function() {
     }
 
     /**
+     * Displays a customizable basic non-blocking system alert
+     * 
+     * @param {String} text The text or prompt to display
+     * @param {Function} callback If present, confirm buttons will be shown and the callback will be called with the response
+     */
+    var systemAlertSetup = false;
+    function systemAlert(text, callback) {
+        var alertBox = document.getElementById('systemAlert');
+        // alertBox.style.display = 'block';
+        $('#systemAlert').modal('show');
+        var confirmButtons = alertBox.querySelectorAll('button.btn');
+        confirmButtons.forEach(function(button) {
+            if (callback) button.hidden = false;
+            else button.hidden = true;
+        });
+        document.getElementById('alertContent').innerHTML = text;
+        if (!systemAlertSetup) {
+            systemAlertSetup = true;
+            // alertBox.querySelector('button[data-dismiss]').addEventListener('click', function() {
+            //     alertBox.style.display = 'none';
+            // });
+            confirmButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    if (callback) callback(this.id === 'btnConfirmYes');
+                    $('#systemAlert').modal('hide');
+                });
+            });
+        }
+    } 
+
+    /**
      * Displays a Bootstrap warning alert with information about how to access content in a ZIM with unsupported active UI
      */
     var activeContentWarningSetup = false;
@@ -440,6 +471,7 @@ define(rqDef, function() {
         replaceCSSLinkWithInlineCSS: replaceCSSLinkWithInlineCSS,
         deriveZimUrlFromRelativeUrl: deriveZimUrlFromRelativeUrl,
         removeUrlParameters: removeUrlParameters,
+        systemAlert: systemAlert,
         displayActiveContentWarning: displayActiveContentWarning,
         displayFileDownloadAlert: displayFileDownloadAlert,
         isElementInView: isElementInView,
