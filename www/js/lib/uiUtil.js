@@ -141,7 +141,7 @@ define(rqDef, function() {
     var alertBox = document.getElementById('systemAlert');
     var confirmButtons = alertBox.querySelectorAll('button.btn');
     var getResponse;
-    
+
     /**
      * Displays a customizable basic non-blocking system alert
      * 
@@ -150,16 +150,16 @@ define(rqDef, function() {
      */
     function systemAlert(text, callback) {
         getResponse = callback;
-        $('#systemAlert').modal('show');
+        document.getElementById('alertContent').innerHTML = text;
         confirmButtons.forEach(function (button) {
             if (callback) button.hidden = false;
             else button.hidden = true;
         });
-        document.getElementById('alertContent').innerHTML = text;
+        $('#systemAlert').modal('show');
     }
     var checkButtonClicked = function (e) {
         if (getResponse) getResponse(e.target.id === 'btnConfirmYes');
-    }
+    };
     confirmButtons.forEach(function (button) {
         button.addEventListener('click', checkButtonClicked);
     });
