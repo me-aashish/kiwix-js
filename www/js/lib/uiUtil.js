@@ -138,15 +138,16 @@ define(rqDef, function() {
         return decodeURIComponent(zimUrl.pathname.replace(/^\//, ''));
     }
 
+    var alertBox = document.getElementById('systemAlert');
+    var confirmButtons = alertBox.querySelectorAll('button.btn');
+    var getResponse;
+    
     /**
      * Displays a customizable basic non-blocking system alert
      * 
      * @param {String} text The text or prompt to display
      * @param {Function} callback If present, confirm buttons will be shown and the callback will be called with the response
      */
-    var alertBox = document.getElementById('systemAlert');
-    var confirmButtons = alertBox.querySelectorAll('button.btn');
-    var getResponse;
     function systemAlert(text, callback) {
         getResponse = callback;
         $('#systemAlert').modal('show');
@@ -156,13 +157,12 @@ define(rqDef, function() {
         });
         document.getElementById('alertContent').innerHTML = text;
     }
-    function checkButtonClicked(e) {
+    var checkButtonClicked = function (e) {
         if (getResponse) getResponse(e.target.id === 'btnConfirmYes');
     }
     confirmButtons.forEach(function (button) {
         button.addEventListener('click', checkButtonClicked);
     });
-
 
     /**
      * Displays a Bootstrap warning alert with information about how to access content in a ZIM with unsupported active UI
