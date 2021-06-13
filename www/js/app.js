@@ -1194,8 +1194,9 @@ define(['jquery', 'zimArchiveLoader', 'uiUtil', 'settingsStore','abstractFilesys
                             if (/^http/i.test(href)) {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                uiUtil.systemAlert('Do you want to open this external link?<br />' + href, function(response) {
-                                    if (response) window.open(href,  '_blank');
+                                var thisHref = href;
+                                uiUtil.systemAlert('Do you want to open this external link?<br />' + thisHref, function(response) {
+                                    if (response) window.open(thisHref,  '_blank');
                                 });
                             }
                         }
