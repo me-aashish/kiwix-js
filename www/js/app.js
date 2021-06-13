@@ -1188,13 +1188,13 @@ define(['jquery', 'zimArchiveLoader', 'uiUtil', 'settingsStore','abstractFilesys
                     if (params.useHomeKeyToFocusSearchBar)
                         iframeArticleContent.contentWindow.addEventListener('keydown', focusPrefixOnHomeKey);
                     // Add event listener to iframe window to check for links to external resources
-                    iframeArticleContent.contentWindow.addEventListener('mousedown', function (e) {
+                    iframeArticleContent.contentWindow.addEventListener('click', function (e) {
                         if (e.target.tagName === 'A') {
                             var href = e.target.getAttribute('href');
                             if (/^http/i.test(href)) {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                uiUtil.systemAlert('Do you want to open this external link<br />:' + href, function(response) {
+                                uiUtil.systemAlert('Do you want to open this external link?<br />' + href, function(response) {
                                     if (response) window.open(href,  '_blank');
                                 });
                             }
