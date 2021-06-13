@@ -144,30 +144,25 @@ define(rqDef, function() {
      * @param {String} text The text or prompt to display
      * @param {Function} callback If present, confirm buttons will be shown and the callback will be called with the response
      */
-    var systemAlertSetup = false;
+    var alertBox = document.getElementById('systemAlert');
+    var confirmButtons = alertBox.querySelectorAll('button.btn');
+    var getResponse;
     function systemAlert(text, callback) {
-        var alertBox = document.getElementById('systemAlert');
-        // alertBox.style.display = 'block';
+        getResponse = callback;
         $('#systemAlert').modal('show');
-        var confirmButtons = alertBox.querySelectorAll('button.btn');
-        confirmButtons.forEach(function(button) {
+        confirmButtons.forEach(function (button) {
             if (callback) button.hidden = false;
             else button.hidden = true;
         });
         document.getElementById('alertContent').innerHTML = text;
-        if (!systemAlertSetup) {
-            systemAlertSetup = true;
-            // alertBox.querySelector('button[data-dismiss]').addEventListener('click', function() {
-            //     alertBox.style.display = 'none';
-            // });
-            confirmButtons.forEach(function (button) {
-                button.addEventListener('click', function () {
-                    if (callback) callback(this.id === 'btnConfirmYes');
-                    $('#systemAlert').modal('hide');
-                });
-            });
-        }
-    } 
+    }
+    function checkButtonClicked(e) {
+        if (getResponse) getResponse(e.target.id === 'btnConfirmYes');
+    }
+    confirmButtons.forEach(function (button) {
+        button.addEventListener('click', checkButtonClicked);
+    });
+
 
     /**
      * Displays a Bootstrap warning alert with information about how to access content in a ZIM with unsupported active UI
