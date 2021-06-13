@@ -139,7 +139,7 @@ define(rqDef, function() {
     }
 
     var alertBox = document.getElementById('systemAlert');
-    var confirmButtons = alertBox.querySelectorAll('button.btn');
+    var confirmButtons = alertBox ? alertBox.querySelectorAll('button.btn') : [];
     var getResponse;
 
     /**
