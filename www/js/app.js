@@ -1357,7 +1357,11 @@ define(['jquery', 'zimArchiveLoader', 'uiUtil', 'settingsStore','abstractFilesys
             docBody = docBody ? docBody[0] : null;
             if (docBody) {
                 // Add any missing classes stripped from the <html> tag
-                if (htmlCSS) docBody.classList.add(htmlCSS);
+                try {
+                    if (htmlCSS) docBody.classList.add(htmlCSS);
+                } catch (err) {
+                    console.error('Error attempting to add stripped style classes back into DOM', err);
+                }
                 // Deflect drag-and-drop of ZIM file on the iframe to Config
                 docBody.addEventListener('dragover', handleIframeDragover);
                 docBody.addEventListener('drop', handleIframeDrop);

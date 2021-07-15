@@ -330,6 +330,7 @@ define(['xzdec_wrapper', 'zstddec_wrapper', 'util', 'utf8', 'q', 'zimDirEntry', 
                 return that.dirEntryByUrlIndex(index);
             }).then(function(dirEntry) {
                 if (!dirEntry) return null;
+                console.debug('Listing dirEntry:', dirEntry);
                 // Request the metadata for the blob represented by the dirEntry
                 return that.blob(dirEntry.cluster, dirEntry.blob, true);
             }).then(function(metadata) {
@@ -339,6 +340,8 @@ define(['xzdec_wrapper', 'zstddec_wrapper', 'util', 'utf8', 'q', 'zimDirEntry', 
                     that[listing.ptrName] = metadata.ptr;
                     that[listing.countName] = metadata.size / 4; // Each entry uses 4 bytes
                     highestListingVersion = Math.max(~~listing.path.replace(/.+(\d)$/, '$1'), highestListingVersion);
+                } else {
+                    console.warn('This ZIM appears to have invalid metadata in the directory listing ' + listing, metadata);
                 }
                 // Get the next Listing
                 return listingAccessor(listings.pop());
