@@ -1556,7 +1556,7 @@ define(['jquery', 'zimArchiveLoader', 'uiUtil', 'settingsStore','abstractFilesys
                             var t1 = performance.now();
                             var readTime = Math.round(t1 - t0);
                             console.log("Content given by the webworker in " + readTime + " milliseconds");
-                            var message = {'action': 'giveContent', 'title' : title, 'content': event2.data};
+                            var message = {'action': 'giveContent', 'title' : title, 'content': event2.data.content, 'mimetype': event2.data.mimetype};
                             messagePort.postMessage(message);
                         };
                         libzimWebWorker.postMessage({action: "getContentByUrl", url: title}, [tmpMessageChannel.port2]);
