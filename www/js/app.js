@@ -1566,26 +1566,19 @@ define(['jquery', 'zimArchiveLoader', 'uiUtil', 'settingsStore','abstractFilesys
                     if (dirEntry === null) {
                         console.error("Title " + title + " not found in archive.");
                         messagePort.postMessage({ 'action': 'giveContent', 'title': title, 'content': '' });
-                    } else if (dirEntry.isRedirect()) {
-                        selectedArchive.resolveRedirect(dirEntry, function (resolvedDirEntry) {
-                            var redirectURL = resolvedDirEntry.namespace + "/" + resolvedDirEntry.url;
-                            // Ask the ServiceWorker to send an HTTP redirect to the browser.
-                            // We could send the final content directly, but it is necessary to let the browser know in which directory it ends up.
-                            // Else, if the redirect URL is in a different directory than the original URL,
-                            // the relative links in the HTML content would fail. See #312
-                            messagePort.postMessage({ 'action': 'sendRedirect', 'title': title, 'redirectUrl': redirectURL });
-                        });
+                    } else if (dirEntry.isRedirect) {
+                        var redirectPath = dirEntry.redirectPath;
+                        // Ask the ServiceWork to send an HTTP redirect to the browser.
+                        // We could send the final content directly, but it is necessary to let the browser know in which directory it ends up.
+                        // Else, if the redirect URL is in a different directory than the original URL,
+                        // the relative links in the HTML content would fail. See #312
+                        messagePort.postMessage({ 'action': 'sendRedirect', 'title': title, 'redirectUrl': redirectPath });
                     } else {
-                        // TODO : we should be able to create the Entry by its offset
-                        //console.log("dirEntry.offset:"+dirEntry.offset);
-                        //callLibzimWebWorker({action: "getEntryByTitleIndex", titleIndex: dirEntry.offset}).then(function(){
-                        callLibzimWebWorker({action: "getEntryByPath", path: title}).then(function(data){
-                            var message = {'action': 'giveContent', 'title': title, 'content': data.content, 'mimetype': data.mimetype};
-                            messagePort.postMessage(message);
-                        });
+                        var message = {'action': 'giveContent', 'title': title, 'content': dirEntry.content, 'mimetype': dirEntry.mimetype};
+                        messagePort.postMessage(message);
                     }
                 };
-                selectedArchive.getDirEntryByPath(title).then(readFile).catch(function () {
+                callLibzimWebWorker({action: "getEntryByPath", path: title, follow: false}).then(readFile).catch(function () {
                     messagePort.postMessage({ 'action': 'giveContent', 'title': title, 'content': new Uint8Array() });
                 });
             } else {
