@@ -1559,7 +1559,9 @@ define(['jquery', 'zimArchiveLoader', 'uiUtil', 'settingsStore','abstractFilesys
                             var message = {'action': 'giveContent', 'title' : title, 'content': event2.data.content, 'mimetype': event2.data.mimetype};
                             messagePort.postMessage(message);
                         };
-                        libzimWebWorker.postMessage({action: "getContentByUrl", url: title}, [tmpMessageChannel.port2]);
+                        //console.log("dirEntry.offset:"+dirEntry.offset);
+                        //libzimWebWorker.postMessage({action: "getEntryByTitleIndex", titleIndex: dirEntry.offset}, [tmpMessageChannel.port2]);
+                        libzimWebWorker.postMessage({action: "getEntryByPath", path: title}, [tmpMessageChannel.port2]);
                     }
                 };
                 selectedArchive.getDirEntryByPath(title).then(readFile).catch(function () {
