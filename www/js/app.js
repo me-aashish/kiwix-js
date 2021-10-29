@@ -1520,6 +1520,33 @@ define(['jquery', 'zimArchiveLoader', 'uiUtil', 'settingsStore','abstractFilesys
     var libzimWebWorker = new Worker("a.out.js");
     
     /**
+     * Calls the libzim WebWorker with the given parameters, and returns a Promise with its response
+     * 
+     * @param {Object} parameters
+     * @returns {Promise}
+     */
+    function callLibzimWebWorker(parameters) {
+        return new Promise(function (resolve, reject) {
+            console.debug("Calling libzim WebWorker with parameters", parameters);
+            var tmpMessageChannel = new MessageChannel();
+            var t0 = performance.now();
+            tmpMessageChannel.port1.onmessage = function (event) {
+                var t1 = performance.now();
+                var readTime = Math.round(t1 - t0);
+                console.debug("Response given by the WebWorker in " + readTime + " milliseconds", event.data);
+                resolve(event.data);
+            };
+            tmpMessageChannel.port1.onerror = function (event) {
+                var t1 = performance.now();
+                var readTime = Math.round(t1 - t0);
+                console.error("Error sent by the WebWorker in " + readTime + " milliseconds", event.data);
+                reject(event.data);
+            };
+            libzimWebWorker.postMessage(parameters, [tmpMessageChannel.port2]);
+        });
+    }
+    
+    /**
      * Function that handles a message of the messageChannel.
      * It tries to read the content in the backend, and sends it back to the ServiceWorker
      *
@@ -1549,19 +1576,13 @@ define(['jquery', 'zimArchiveLoader', 'uiUtil', 'settingsStore','abstractFilesys
                             messagePort.postMessage({ 'action': 'sendRedirect', 'title': title, 'redirectUrl': redirectURL });
                         });
                     } else {
-                        console.log("Reading content from libzim for title " + title + "...");
-                        var tmpMessageChannel = new MessageChannel();
-                        var t0 = performance.now();
-                        tmpMessageChannel.port1.onmessage = function (event2) {
-                            var t1 = performance.now();
-                            var readTime = Math.round(t1 - t0);
-                            console.log("Content given by the webworker in " + readTime + " milliseconds");
-                            var message = {'action': 'giveContent', 'title' : title, 'content': event2.data.content, 'mimetype': event2.data.mimetype};
-                            messagePort.postMessage(message);
-                        };
+                        // TODO : we should be able to create the Entry by its offset
                         //console.log("dirEntry.offset:"+dirEntry.offset);
-                        //libzimWebWorker.postMessage({action: "getEntryByTitleIndex", titleIndex: dirEntry.offset}, [tmpMessageChannel.port2]);
-                        libzimWebWorker.postMessage({action: "getEntryByPath", path: title}, [tmpMessageChannel.port2]);
+                        //callLibzimWebWorker({action: "getEntryByTitleIndex", titleIndex: dirEntry.offset}).then(function(){
+                        callLibzimWebWorker({action: "getEntryByPath", path: title}).then(function(data){
+                            var message = {'action': 'giveContent', 'title': title, 'content': data.content, 'mimetype': data.mimetype};
+                            messagePort.postMessage(message);
+                        });
                     }
                 };
                 selectedArchive.getDirEntryByPath(title).then(readFile).catch(function () {
