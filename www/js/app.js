@@ -1533,13 +1533,13 @@ define(['jquery', 'zimArchiveLoader', 'uiUtil', 'settingsStore','abstractFilesys
             tmpMessageChannel.port1.onmessage = function (event) {
                 var t1 = performance.now();
                 var readTime = Math.round(t1 - t0);
-                console.debug("Response given by the WebWorker in " + readTime + " milliseconds", event.data);
+                console.debug("Response given by the WebWorker in " + readTime + " ms", event.data);
                 resolve(event.data);
             };
             tmpMessageChannel.port1.onerror = function (event) {
                 var t1 = performance.now();
                 var readTime = Math.round(t1 - t0);
-                console.error("Error sent by the WebWorker in " + readTime + " milliseconds", event.data);
+                console.error("Error sent by the WebWorker in " + readTime + " ms", event.data);
                 reject(event.data);
             };
             libzimWebWorker.postMessage(parameters, [tmpMessageChannel.port2]);
